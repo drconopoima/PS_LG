@@ -2,7 +2,7 @@
 
 ## Antes de Empezar
 
-[Read in English](https://github.com/drconopoima/PS_LG.git/blob/master/README.en.md)
+[Read in English](https://github.com/drconopoima/PS_LG/blob/master/README.en.md)
 
 ### Ejercicio 1
 
