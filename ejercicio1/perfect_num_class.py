@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from functools import reduce
 from math import sqrt
+from  functools import reduce
 
 class NotIntOrLong(TypeError):
     """
@@ -45,6 +45,8 @@ def factors(n):
                     ([i, n//i] for i in range(1, int(sqrt(n))+1, step) if n % i == 0)))
     except TypeError:
         raise NotIntOrLong("Please provide an Integer or a Long as arguments to function factors")
+    except Exception:
+        raise Exception("Something went wrong. Please make sure that dependencies functools.reduce and math.sqrt are imported as reduce and sqrt, respectively.")
 
 def perfect_calculation(list):
     pass
