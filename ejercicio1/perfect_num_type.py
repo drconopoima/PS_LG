@@ -1,107 +1,158 @@
 # -*- coding: utf-8 -*-
 from math import sqrt
 from  functools import reduce
+import collections
 
 class NotIntOrLong(TypeError):
     """
     ESPAÑOL:
      * [NotIntOrLong(TypeError) Clase de error personalizada para proporcionar una descripción
-        informativa cuando los argumentos para la función de obtención de factores no son de
-        tipo int o long]
+                                informativa cuando los argumentos para la función de obtención
+                                de factores no son de tipo int o long
     ENGLISH:
      * [NotIntOrLong(TypeError) Custom error class to provide an informative description when
-        the arguments for the factoring function are not of the int or long type]
+                                the arguments for the factoring function are not of the int or
+                                long type
     """
     pass
 
 def factors(number):
     """
     ESPAÑOL:
-     * [factors(number) Función que encuentra todos los factores de un entero]
-     * @param  {[int o long]} n [un número entero al que quiere encontrarsele factores]
-     * @return {[set]}        result_factors [una lista de factores para el número entero]
+     * factors(number)               Función que encuentra todos los factores de un entero
+     * @param  [int o long] entrada  [un número entero al que quiere encontrarsele factores]
+     * @return [set]        salida   [un tuple de factores para el número entero]
 
      Basado en respuestas de Stack Overflow por agf y Steinar Lima bajo licencia cc by-sa 3.0
      con atribución requerida.
+     https://stackoverflow.com/questions/6800193/what-is-the-most-efficient-way-of-finding-all-the-factors-of-a-number-in-python
 
     ENGLISH:
-     * [factors(n) finds all the factors of an integer]
-     * @param  {[int or long]} n [an integer to find factors for]
-     * @return {[set]}        result_factors [a set of factors for the integer]
+     * factors(n)                     Function that finds all the factors of an integer
+     * @param  [int or long]  input   [an integer to find factors for]
+     * @return [set]          output  [a set of factors for the integer]
 
      Based on Stack Overflow answers by agf and Steinar Lima licensed under cc by-sa 3.0 with
      attribution required.
+     https://stackoverflow.com/questions/6800193/what-is-the-most-efficient-way-of-finding-all-the-factors-of-a-number-in-python
     """
     try:
         step = 2 if number%2 else 1
-        return set(reduce(list.__add__,
-                ([i, number//i] for i in range(1, int(sqrt(number))+1, step) if number % i == 0)))
+        return set(reduce(tuple.__add__,
+                ((i, number//i) for i in range(1, int(sqrt(number))+1, step) if number % i == 0)))
     except TypeError:
         raise NotIntOrLong("factors() argument must be a number of type Int or Long")
     except Exception:
         raise Exception(("Something went wrong with execution of factors(). Please "
-                         "make sure that dependencies functools.reduce and math.sqrt "
-                         "are imported as reduce and sqrt, respectively."))
+                        "make sure that dependencies functools.reduce and math.sqrt "
+                        "are imported as reduce and sqrt, respectively."))
 
 
 
 class NotIterable(TypeError):
     """
     ESPAÑOL:
-     * [NotIterable(TypeError) Clase de error personalizada para proporcionar una descripción
+     * NotIterable(TypeError)  Clase de error personalizada para proporcionar una descripción
                                de error cuando no se suministran los argumentos como una
-                               estructura iterable]
+                               estructura iterable
     ENGLISH:
-     * [NotIterable(TypeError) Custom error class to provide an error description when
-                               the arguments are not provided in an iterable structure]
+     * NotIterable(TypeError)  Custom error class to provide an error description when
+                               the arguments are not provided in an iterable structure
     """
     pass
 
-def factoring_list(lista):
+def factoring_list(integers):
     """
     ESPAÑOL:
-     * factoring_list(lista) [Encuentra todos los factores de números enteros en una lista argumento
-                             (incluyendo al propio número) y los devuelve dentro de una lista que
-                             contiene varias listas de factores]
-     * @param  [list]     lista       [un iterable que contiene número(s) entero(s). Se convertirá
-                                      automáticamente en una lista en el momento de la ejecución.
-     * @return [2-d list] factors_list [devuelve todos los factores de los números enteros como una
-                                       lista de listas, incluyendo al propio número factorizado]
+     * factoring_list(integers)            Encuentra todos los factores de números enteros en los
+                                           numeros contenidos en un argumento iterable (incluyendo
+                                           al propio número) y los devuelve dentro de una lista que
+                                           contiene sets de los factores de los enteros
+     * @param  [iterable]       entrada    [un iterable que contiene número(s) entero(s)]
+     * @return [list of sets]   salida     [devuelve todos los factores de los números enteros como una
+                                           lista de sets, incluyendo al propio número factorizado]
     ENGLISH:
-     * factoring_list(lista) [Finds all factors for integers passed in the argument list (including
-                             the number itself) and returns them within a list containing several
-                             factor lists within a list that contains several lists of factors]
-     * @param  [list]     lista        [an iterable type with integers. It will be automatically
-                                       converted into a list on execution]
-     * @return [2-d list] factors_list [returns all integer factors as a list of lists, including
-                                       the factored number itself]
+     * factoring_list(integers)            Finds all integer factors in the numbers contained in an
+                                           iterable argument (including the number itself) and returns
+                                           them into a list containing several sets of number factors
+     * @param  [iterable]      input       [an iterable type with integers.]
+     * @return [list of sets]  output      [returns all integer factors as a list of sets, including
+                                           the factored number itself]
     """
-    try:
-        lista = list(lista) # asegurando el tipo de argumento sea una lista
-    except TypeError:
-        raise NotIterable(("factoring_list() arguments must be a list or another "
-                           "iterable containing integers of type Int or Long."))
     factors_list = []
-    for intgr in lista:
-        factors_list.append(factors(intgr))
-    return factors_list
+    try:
+        for intgr in integers:
+            factors_list.append(factors(intgr))
+        return factors_list
+    except TypeError:
+        raise NotIterable(("factoring_list() arguments must be a tuple or another "
+                           "iterable containing integers of type Int or Long. A single "
+                           "integer of type int or long can be passed as well."))
 
-def perfect_calculation(lista):
+def perfect_calculation(integers):
     """
     ESPAÑOL:
-     * perfect_calculation(lista) Retorna una lista con la suma dividida entre 2 de todos los
-                                  factores de los enteros del argumento, incluyendo al propio
-                                  número que fue factorizado.
-     * @param [list]      lista   [un iterable que contiene número(s) entero(s). Se convertirá
-                                  automáticamente en una lista en el momento de la ejecución.]
-     * @return [list]     output  [suma dividida entre 2 de los factores de los números de la
-                                  lista de enteros en el argumento]
+     * perfect_calculation(integers)    Retorna un tuple con la suma dividida entre 2 de todos los
+                                        factores de los enteros del argumento, incluyendo al propio
+                                        número que fue factorizado.
+     * @param  [iterable] entrada       [un iterable que contiene número(s) entero(s). Se convertirá
+                                        automáticamente en un tuple en el momento de la ejecución.]
+     * @return [tuple]    salida        [suma dividida entre 2 de los factores de los números de la
+                                        tuple de enteros en el argumento]
      ENGLISH:
-      * perfect_calculation(lista) [Returns a list with the sum of all the factors of the integers of
-                                   the argument, excluding the very number that was factored.]
-      * @param [list]      lista   [an iterable containing integer(s). It will automatically become
-                                   a list at runtime].
-      * @return [list]     output [sum divided by 2 of the factors of the numbers in the list
-                                   argument]
+      * perfect_calculation(integers)   [Returns a tuple with the sum of all the factors of the integers
+                                        of the argument, excluding the very number that was factored.]
+      * @param  [iterable]  input       [an iterable containing integer(s). It will automatically
+                                        become a tuple at runtime].
+      * @return [tuple]     output      [sum divided by 2 of the factors of the numbers in the tuple
+                                        argument]
     """
-    return [sum(each_factors_list)/2 for each_factors_list in factoring_list([item for item in lista])]
+    return tuple(sum(each_factors_list)/2 for each_factors_list in factoring_list(integers))
+
+def classify(integers):
+    """
+    ESPAÑOL:
+     * classify(integers)                     Retorna un tuple con strings categorizando cada elemento según
+                                              el resultado de la comparación consigo mismo del cálculo de la
+                                              suma de sus factores dividida entre 2:
+                                              "perfect":   Si ambos números comparados son iguales, es un
+                                                           número perfecto ("perfect", en inglés)
+                                              "abundant":  Si la suma entre 2 de los factores es mayor al
+                                                           número, es un número abundante ("abundant", en
+                                                           inglés)
+                                              "deficient": Si la suma entre 2 de los factores es menor al
+                                                           número, es un número defectivo ("deficient", en
+                                                           inglés)
+     * @param  [int, long, iterable] entrada  [un iterable que contiene número(s) entero(s). Se convertirá
+                                              automáticamente en un tuple en el momento de la ejecución.]
+     * @return [tuple]   salida               [tuple de strings categorizando los números según estos sean
+                                              "perfect" (número perfecto), "abundant" (abundante) o
+                                              "deficient" (defectivo)]
+     ENGLISH:
+      * classify(integers)                    [Returns a tuple with strings categorizing each element
+                                              according to the result of the comparison with itself of the
+                                              calculation of the sum of its factors divided by 2:
+                                              "perfect":   If both numbers compared are the same, it is a
+                                                           perfect number.
+                                              "abundant":  If the sum of 2 of the factors is greater than the
+                                                           number, it is an abundant number.
+                                              "deficient": If the sum of 2 of the factors is less than the
+                                                           number, it is a deficient number.
+      * @param  [int, long, iterable] input   [an iterable containing integer(s). It will automatically
+                                              become a tuple at runtime if it is an integer or another
+                                              iterable].
+      * @return [tuple]               output  [tuple of strings categorising the numbers according to
+                                              whether they are 'perfect', 'abundant' or 'deficient']
+    """
+    if isinstance(integers, (int, long)):
+        integers = (integers,) # crear un tuple para que sea iterable
+    output = []  # necesita ser una lista para agregar cada elemento por separado
+    for index,factors_sum in enumerate(perfect_calculation(integers)):
+        evaluate_perfection = factors_sum - integers[index]
+        if evaluate_perfection == 0:
+            output.append('perfect')
+        elif evaluate_perfection > 0:
+            output.append('abundant')
+        else:
+            output.append('deficient')
+    return tuple(output)
