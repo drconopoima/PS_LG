@@ -14,10 +14,10 @@ class NotIntOrLong(TypeError):
     """
     pass
 
-def factors(n):
+def factors(number):
     """
     ESPAÑOL:
-     * [factors(n) encuentra todos los factores de un entero]
+     * [factors(number) Función que encuentra todos los factores de un entero]
      * @param  {[int o long]} n [un número entero al que quiere encontrarsele factores]
      * @return {[set]}        result_factors [una lista de factores para el número entero]
 
@@ -33,9 +33,9 @@ def factors(n):
      attribution required.
     """
     try:
-        step = 2 if n%2 else 1
+        step = 2 if number%2 else 1
         return set(reduce(list.__add__,
-                ([i, n//i] for i in range(1, int(sqrt(n))+1, step) if n % i == 0)))
+                ([i, number//i] for i in range(1, int(sqrt(number))+1, step) if number % i == 0)))
     except TypeError:
         raise NotIntOrLong("factors() argument must be a number of type Int or Long")
     except Exception:
@@ -61,19 +61,19 @@ def factoring_list(lista):
     """
     ESPAÑOL:
      * factoring_list(lista) [Encuentra todos los factores de números enteros en una lista argumento
-                             (excluyendo al propio número) y los devuelve dentro de una lista que
+                             (incluyendo al propio número) y los devuelve dentro de una lista que
                              contiene varias listas de factores]
      * @param  [list]     lista       [un iterable que contiene número(s) entero(s). Se convertirá
                                       automáticamente en una lista en el momento de la ejecución.
      * @return [2-d list] factors_list [devuelve todos los factores de los números enteros como una
-                                       lista de listas, excluyendo al propio número factorizado]
+                                       lista de listas, incluyendo al propio número factorizado]
     ENGLISH:
-     * factoring_list(lista) [Finds all factors for integers passed in the argument list (excluding
+     * factoring_list(lista) [Finds all factors for integers passed in the argument list (including
                              the number itself) and returns them within a list containing several
                              factor lists within a list that contains several lists of factors]
      * @param  [list]     lista        [an iterable type with integers. It will be automatically
                                        converted into a list on execution]
-     * @return [2-d list] factors_list [returns all integer factors as a list of lists, excluding
+     * @return [2-d list] factors_list [returns all integer factors as a list of lists, including
                                        the factored number itself]
     """
     try:
@@ -83,24 +83,25 @@ def factoring_list(lista):
                            "iterable containing integers of type Int or Long."))
     factors_list = []
     for intgr in lista:
-        tmp_list = list(factors(intgr))
-        tmp_list.remove(intgr)
-        factors_list.append(tmp_list)
+        factors_list.append(factors(intgr))
     return factors_list
 
 def perfect_calculation(lista):
     """
     ESPAÑOL:
-     * perfect_calculation(lista) Retorna una lista con la suma de todos los factores de los enteros
-                                  del argumento, excluyendo al propio número que fue factorizado.
+     * perfect_calculation(lista) Retorna una lista con la suma dividida entre 2 de todos los
+                                  factores de los enteros del argumento, incluyendo al propio
+                                  número que fue factorizado.
      * @param [list]      lista   [un iterable que contiene número(s) entero(s). Se convertirá
                                   automáticamente en una lista en el momento de la ejecución.]
-     * @return [list]     sumados [suma de los factores de los números de la lista argumento]
+     * @return [list]     output  [suma dividida entre 2 de los factores de los números de la
+                                  lista de enteros en el argumento]
      ENGLISH:
       * perfect_calculation(lista) [Returns a list with the sum of all the factors of the integers of
                                    the argument, excluding the very number that was factored.]
       * @param [list]      lista   [an iterable containing integer(s). It will automatically become
-                                    a list at runtime].
-      * @return [list]     sumados [sum of the factors of the numbers in the list argument]
+                                   a list at runtime].
+      * @return [list]     output [sum divided by 2 of the factors of the numbers in the list
+                                   argument]
     """
-    return [sum(each_factors_list) for each_factors_list in factoring_list([item for item in lista])]
+    return [sum(each_factors_list)/2 for each_factors_list in factoring_list([item for item in lista])]
