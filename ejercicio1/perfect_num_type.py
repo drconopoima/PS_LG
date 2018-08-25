@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from math import sqrt
 from  functools import reduce
-import collections
 
 class NotIntOrLong(TypeError):
     """
@@ -86,8 +85,7 @@ def factoring_list(integers):
         return factors_list
     except TypeError:
         raise NotIterable(("factoring_list() arguments must be a tuple or another "
-                           "iterable containing integers of type Int or Long. A single "
-                           "integer of type int or long can be passed as well."))
+                           "iterable containing integers of type Int or Long."))
 
 def perfect_calculation(integers):
     """
