@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from math import sqrt
 from  functools import reduce
+import sys
+from collections import OrderedDict
 
 class NotIntOrLong(TypeError):
     """
@@ -20,14 +22,14 @@ def factors(number):
     ESPAÑOL:
      * factors(number)               Función que encuentra todos los factores de un entero
      * @param  [int o long] entrada  [un número entero al que quiere encontrarsele factores]
-     * @return [set]        salida   [un tuple de factores para el número entero]
+     * @return [set]        salida   [un set de factores para el número entero]
 
      Basado en respuestas de Stack Overflow por agf y Steinar Lima bajo licencia cc by-sa 3.0
      con atribución requerida.
      https://stackoverflow.com/questions/6800193/what-is-the-most-efficient-way-of-finding-all-the-factors-of-a-number-in-python
 
     ENGLISH:
-     * factors(n)                     Function that finds all the factors of an integer
+     * factors(number)                Function that finds all the factors of an integer
      * @param  [int or long]  input   [an integer to find factors for]
      * @return [set]          output  [a set of factors for the integer]
 
@@ -74,7 +76,7 @@ def factoring_list(integers):
      * factoring_list(integers)            Finds all integer factors in the numbers contained in an
                                            iterable argument (including the number itself) and returns
                                            them into a list containing several sets of number factors
-     * @param  [iterable]      input       [an iterable type with integers.]
+     * @param  [iterable]      input       [an iterable type containing integer(s).]
      * @return [list of sets]  output      [returns all integer factors as a list of sets, including
                                            the factored number itself]
     """
@@ -93,15 +95,13 @@ def perfect_calculation(integers):
      * perfect_calculation(integers)    Retorna un tuple con la suma dividida entre 2 de todos los
                                         factores de los enteros del argumento, incluyendo al propio
                                         número que fue factorizado.
-     * @param  [iterable] entrada       [un iterable que contiene número(s) entero(s). Se convertirá
-                                        automáticamente en un tuple en el momento de la ejecución.]
+     * @param  [iterable] entrada       [un iterable que contiene número(s) entero(s).]
      * @return [tuple]    salida        [suma dividida entre 2 de los factores de los números de la
                                         tuple de enteros en el argumento]
      ENGLISH:
-      * perfect_calculation(integers)   [Returns a tuple with the sum of all the factors of the integers
-                                        of the argument, excluding the very number that was factored.]
-      * @param  [iterable]  input       [an iterable containing integer(s). It will automatically
-                                        become a tuple at runtime].
+      * perfect_calculation(integers)   Returns a tuple with the sum of all the factors of the integers
+                                        of the argument, excluding the very number that was factored.
+      * @param  [iterable]  input       [an iterable containing integer(s).
       * @return [tuple]     output      [sum divided by 2 of the factors of the numbers in the tuple
                                         argument]
     """
@@ -115,15 +115,15 @@ def classify(integers):
                                               suma de sus factores dividida entre 2:
                                               "perfect":   Si ambos números comparados son iguales, es un
                                                            número perfecto ("perfect", en inglés)
-                                              "abundant":  Si la suma entre 2 de los factores es mayor al
-                                                           número, es un número abundante ("abundant", en
+                                              "abundant":  Si la suma de los factores dividida entre 2 es mayor
+                                                           al número, es un número abundante ("abundant", en
                                                            inglés)
-                                              "deficient": Si la suma entre 2 de los factores es menor al
-                                                           número, es un número defectivo ("deficient", en
+                                              "deficient": Si la suma de los factores dividida entre 2 es menor
+                                                           al número, es un número defectivo ("deficient", en
                                                            inglés)
-     * @param  [int, long, iterable] entrada  [un iterable que contiene número(s) entero(s). Se convertirá
-                                              automáticamente en un tuple en el momento de la ejecución.]
-     * @return [tuple]   salida               [tuple de strings categorizando los números según estos sean
+     * @param  [int, long, iterable] entrada  [Un entero o una estructura iterable que contiene número(s)
+                                              entero(s).]
+     * @return [tuple]   output               [tuple de strings categorizando los números según estos sean
                                               "perfect" (número perfecto), "abundant" (abundante) o
                                               "deficient" (defectivo)]
      ENGLISH:
@@ -132,13 +132,11 @@ def classify(integers):
                                               calculation of the sum of its factors divided by 2:
                                               "perfect":   If both numbers compared are the same, it is a
                                                            perfect number.
-                                              "abundant":  If the sum of 2 of the factors is greater than the
-                                                           number, it is an abundant number.
-                                              "deficient": If the sum of 2 of the factors is less than the
-                                                           number, it is a deficient number.
-      * @param  [int, long, iterable] input   [an iterable containing integer(s). It will automatically
-                                              become a tuple at runtime if it is an integer or another
-                                              iterable].
+                                              "abundant":  If the sum of the factors divided by 2 is greater
+                                                           than the number, it is an abundant number.
+                                              "deficient": If the sum of the factors divided by 2 is lower
+                                                           than the number, it is a deficient number.
+      * @param  [int, long, iterable] input   [An integer or an iterable structure containing integer(s).].
       * @return [tuple]               output  [tuple of strings categorising the numbers according to
                                               whether they are 'perfect', 'abundant' or 'deficient']
     """
@@ -154,3 +152,11 @@ def classify(integers):
         else:
             output.append('deficient')
     return tuple(output)
+
+if len(sys.argv) > 1:
+    arguments = [int(item) for item in sys.argv[1:]]
+    results_list = OrderedDict()
+    classifications = classify(arguments)
+    for index,numbers in enumerate(arguments):
+        results_list[numbers] = classifications[index]
+    print 'classification: ' + str(results_list).replace('OrderedDict','').replace('([','').replace('])','').replace(', (', ',(').replace(', ',': ')
