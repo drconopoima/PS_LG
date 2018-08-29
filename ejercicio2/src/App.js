@@ -7,11 +7,83 @@ import _ from 'lodash';
 import LineChart from './linechart';
 import PieChart from './piechart';
 
-const urls = [
-  'https://s3.amazonaws.com/logtrust-static/test/test/data1.json',
-  'https://s3.amazonaws.com/logtrust-static/test/test/data2.json',
-  'https://s3.amazonaws.com/logtrust-static/test/test/data3.json'
-]
+const dataParsing = {
+  0: {
+    'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data1.json',
+    'date': {
+        'key': 'd',
+        'raw': {
+          'isRaw': false,
+          'regex': undefined
+        },
+        'format': 'milliseconds'
+    },
+    'cat': {
+      'key': 'cat',
+      'raw': {
+        'isRaw': false,
+        'regex': undefined
+      }
+    },
+    'value': {
+      'key': 'value',
+      'raw': {
+        'isRaw': false,
+        'regex': undefined
+      }
+    }
+  },
+  1: {
+    'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data2.json',
+    'date': {
+        'key': 'myDate',
+        'raw': {
+          'isRaw': false,
+          'regex': undefined
+        },
+        'format': 'YYYY-MM-DD'
+    },
+    'cat': {
+      'key': 'categ',
+      'raw': {
+        'isRaw': false,
+        'regex': undefined
+      }
+    },
+    'value': {
+      'key': 'val',
+      'raw': {
+        'isRaw': false,
+        'regex': undefined
+      }
+    }
+  },
+  2: {
+    'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data3.json',
+    'date': {
+        'key': 'raw',
+        'raw': {
+          'isRaw': true,
+          'regex': /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g,
+        },
+        'format': 'YYYY-MM-DD'
+    },
+    'cat': {
+      'key': 'raw',
+      'raw': {
+        'isRaw': true,
+        'regex': /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g
+      }
+    },
+    'value': {
+      'key': 'val',
+      'raw': {
+        'isRaw': false,
+        'regex': undefined
+      }
+    }
+  }
+}
 
 let dataTotals2 = {
   'CAT 1': [],
@@ -37,6 +109,16 @@ class App extends Component {
       data2: {}, // Raw data fetched from data2
       data3: {}, // Raw data fetched from data3
       consolidatedData: true, // When finishes fetching all data doesn't attempt to consolidate again
+      /* cleanedDataForCharts: {  Conjunto de datos organizados en primer nivel por categoría y en segundo nivel por fecha
+       *     'CAT 1': { 'YYYY-MM-DD': Val } ...
+       * ... 'CAT 4': { 'YYYY-MM-DD': Val }
+       * } */
+      cleanedDataForCharts: {
+        'CAT 1': {},
+        'CAT 2': {},
+        'CAT 3': {},
+        'CAT 4': {}
+      },
       dataTotals: {},
       /*
       dataTotals: {
@@ -59,23 +141,36 @@ class App extends Component {
     }
   }
   componentDidMount() {
-    const promise1 = fetch(urls[0]).then(response => response.json())
-
-    promise1.then(firstdataset => this.setState({data1: firstdataset}));
-
-    const promise2 = fetch(urls[1]).then(response => response.json())
-
-    promise2.then(seconddataset => this.setState({data2: seconddataset}));
-
-    const promise3 = fetch(urls[2]).then(response => response.json())
-
-    promise3.then(thirddataset => {
+    /* De acuerdo al lifecycle de React, se monta el componente primero y luego
+     * se hace el fetch con AJAX de la data, para que el usuario vea los gráficos como
+     * "cargando...". Por lo tanto, se ejecuta en Component Did Mount
+    */
+    let allPromises = [];
+    // Crear una promesa por cada Json que haya que recibir
+    Object.values(dataParsing).forEach((objectValue, index) => {
+      allPromises.push(fetch(dataParsing[index]['url'])
+      .then(response => response.json()));
+    })
+    // Cuando se resuelvan todas las promesas, hay que hacer el escaneo y arreglar la data
+    Promise.all(allPromises)
+      .then(allResponses => {
+        this.setState({rawData: allResponses});
+        // Guardar la data en forma limpia en claves 'data#' del estado de la App
+        allResponses.forEach((eachResponse, index) => {
+          console.log(eachResponse);
+        })
+      })
+    allPromises[0].then(firstdataset => this.setState({data1: firstdataset}));
+    allPromises[1].then(seconddataset => this.setState({data2: seconddataset}));
+    allPromises[2].then(thirddataset => {
       let data3 = thirddataset;
-       // Regex que busca una fecha formato YYYY-MM-DD (dias y mes con ceros al comienzo). Fuente: Johan Södercrantz at RegexLib
-       // http://regexlib.com/DisplayPatterns.aspx?cattabindex=4&categoryId=5&AspxAutoDetectCookieSupport=1
-       // Modificado ligeramente para evitar el año 0000 (no existio, el año anterior al 0001 DC fue el 0001 AC)
-       // También quité el "$" y el "^" para evitar que sólo compare con todo el string desde el comienzo (^) hasta el final (*),
+       /* Regex que busca una fecha formato YYYY-MM-DD (dias y mes con ceros al comienzo). Fuente: Johan Södercrantz at RegexLib
+        * http://regexlib.com/DisplayPatterns.aspx?cattabindex=4&categoryId=5&AspxAutoDetectCookieSupport=1
+        * Modificado ligeramente para evitar el año 0000 (no existio, el año anterior al 0001 DC fue el 0001 AC)
+        * También quité el "$" y el "^" para evitar que sólo compare con todo el string desde el comienzo (^) hasta el final (*),
+       */
       let regexDate = /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g;
+      // Regex que busca una categoría entre simbolos de numeral "#".
       let regexCAT = /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g;
       thirddataset.forEach((intdata, index) => {
       intdata.myDate = intdata.raw.match(regexDate)[0];
@@ -83,11 +178,7 @@ class App extends Component {
       data3.index = intdata;
       })
       this.setState({data3: data3})
-      console.log(this.state.data3)
     });
-
-    Promise.all([promise1, promise2, promise3])
-      .then(allResponses => this.setState({rawData: allResponses}))
   }
   componentDidUpdate() {
     if (this.state.consolidatedData) {
@@ -192,13 +283,6 @@ class App extends Component {
         dataTotals2['CAT 2'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 2']];
         dataTotals2['CAT 3'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 3']];
         dataTotals2['CAT 4'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 4']];
-      }
-    } else {
-      dataTotals2={
-        'CAT 1': [],
-        'CAT 2': [],
-        'CAT 3': [],
-        'CAT 4': [],
       }
     }
     let {categoryTotals, consolidatedData} = this.state;
