@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Highcharts from 'highcharts';
-import { LineSeries, withHighcharts } from 'react-jsx-highcharts';
+import { withHighcharts, HighchartsChart, LineSeries, PieSeries } from 'react-jsx-highcharts';
 import _ from 'lodash';
 import LineChart from './linechart';
+import PieChart from './piechart';
 
 const urls = [
   'https://s3.amazonaws.com/logtrust-static/test/test/data1.json',
@@ -163,13 +164,21 @@ class App extends Component {
       }
     }
   }
-  renderSeries (keysAndDataPoints) {
+  renderLineSeries (keysAndDataPoints) {
     return (
       keysAndDataPoints.map((keyAndDataPoint) => {
         return (
             <LineSeries data={keyAndDataPoint[1]} name={keyAndDataPoint[0]} key={_.uniqueId()} />
           )
       })
+    )
+  }
+  renderPieChart (aggregatedValues,chartName) {
+    let pieData = Object.keys(aggregatedValues).map(key => {
+      return [key, aggregatedValues[key]];
+    })
+    return (
+      <PieSeries data={pieData} name={chartName} key={_.uniqueId()} />
     )
   }
   render() {
@@ -192,23 +201,35 @@ class App extends Component {
         'CAT 4': [],
       }
     }
-    console.log(dataTotals2)
+    let {categoryTotals, consolidatedData} = this.state;
+    let pieChartData = this.renderPieChart(categoryTotals,'Total');
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Panel de resultados basado en React</h1>
         </header>
         <div>
             <LineChart
               plotOptions={plotOptions}
-              renderSeries={this.renderSeries([["CAT 1",dataTotals2["CAT 1"]],["CAT 2",dataTotals2["CAT 2"]],["CAT 3",dataTotals2["CAT 3"]],["CAT 4",dataTotals2["CAT 4"]]])}
-              loaded={this.state.consolidatedData}
-              titleProp="Ejercicio 2"
-              subtitleProp="Valores de cada categoria en cada fecha"
-              xAxisProp="Fecha"
-              yAxisProp="Valor"
+              renderSeries={this.renderLineSeries(
+                [["CAT 1",dataTotals2["CAT 1"]],
+                ["CAT 2",dataTotals2["CAT 2"]],
+                ["CAT 3",dataTotals2["CAT 3"]],
+                ["CAT 4",dataTotals2["CAT 4"]]])}
+              loaded={consolidatedData}
+              titleLabel="Ejercicio 2"
+              subtitleLabel="Valores de cada categoria en cada fecha"
+              xAxisLabel="Fecha"
+              yAxisLabel="Valor"
               loadingMsg="Cargando..." />
+            <PieChart
+              titleLabel="Totales para cada categoría"
+              loaded={consolidatedData}
+              renderSeries={pieChartData}
+              loadingMsg="Cargando..."
+              axisLabel="Total" />
+
           </div>
       </div>
     )
