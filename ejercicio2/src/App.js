@@ -2,14 +2,9 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Highcharts from 'highcharts';
-import {
-  HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Subtitle, Legend, LineSeries
-} from 'react-jsx-highcharts';
-import addHighchartsMore from 'highcharts/highcharts-more';
+import { LineSeries, withHighcharts } from 'react-jsx-highcharts';
 import _ from 'lodash';
-import 'tachyons';
-
-addHighchartsMore(Highcharts);
+import LineChart from './linechart';
 
 const urls = [
   'https://s3.amazonaws.com/logtrust-static/test/test/data1.json',
@@ -23,6 +18,14 @@ let dataTotals2 = {
   'CAT 3': [],
   'CAT 4': []
 }
+
+const plotOptions = {
+  line: {
+    marker: {
+      enabled: false
+    }
+  }
+};
 
 class App extends Component {
   constructor() {
@@ -160,6 +163,17 @@ class App extends Component {
       }
     }
   }
+  renderSeries (keysAndDataPoints) {
+    return (
+      keysAndDataPoints.map((keyAndDataPoint) => {
+        return (
+            <LineSeries
+              data={keyAndDataPoint[1]}
+              name={keyAndDataPoint[0]} />
+          )
+      })
+    )
+  }
   render() {
     if (!(_.isEmpty(this.state.categoryTotals) && _.isEmpty(this.state.dataTotals))) {
       let whichDateInMilliseconds
@@ -172,6 +186,13 @@ class App extends Component {
         dataTotals2['CAT 3'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 3']];
         dataTotals2['CAT 4'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 4']];
       }
+    } else {
+      dataTotals2={
+        'CAT 1': [],
+        'CAT 2': [],
+        'CAT 3': [],
+        'CAT 4': [],
+      }
     }
     return (_.isEmpty((this.state.categoryTotals)) && _.isEmpty(this.state.dataTotals)) ?
       <h1>Loading</h1> :
@@ -180,26 +201,7 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
-            <HighchartsChart>
-              <Chart />
-
-              <Title>Ejercicio 2</Title>
-              <Subtitle>Dataset 1, 2 y 3 consolidados juntos</Subtitle>
-              <Legend layout="vertical" align="right" verticalAlign="middle" />
-
-              <XAxis type="datetime">
-                <XAxis.Title>Time</XAxis.Title>
-              </XAxis>
-
-              <YAxis>
-                <YAxis.Title>Value</YAxis.Title>
-                    <LineSeries name="CAT 1" data={dataTotals2['CAT 1']} />
-                    <LineSeries name="CAT 2" data={dataTotals2['CAT 2']} />
-                    <LineSeries name="CAT 3" data={dataTotals2['CAT 3']} />
-                    <LineSeries name="CAT 4" data={dataTotals2['CAT 4']} />
-              </YAxis>
-
-            </HighchartsChart>
+            <LineChart plotOptions={plotOptions} renderSeries={this.renderSeries([["CAT 1",dataTotals2["CAT 1"]],["CAT 2",dataTotals2["CAT 2"]],["CAT 3",dataTotals2["CAT 3"]],["CAT 4",dataTotals2["CAT 4"]]])} loaded="this.consolidatedDate" titleProp="Ejercicio 2" subtitleProp="Cat 1 chart" xAxisProp="Date" yAxisProp="Value" loadingMsg="Fetching Data..." />
         </header>
         </div>
     )
