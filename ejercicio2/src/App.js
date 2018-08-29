@@ -167,9 +167,7 @@ class App extends Component {
     return (
       keysAndDataPoints.map((keyAndDataPoint) => {
         return (
-            <LineSeries
-              data={keyAndDataPoint[1]}
-              name={keyAndDataPoint[0]} />
+            <LineSeries data={keyAndDataPoint[1]} name={keyAndDataPoint[0]} key={_.uniqueId()} />
           )
       })
     )
@@ -194,16 +192,25 @@ class App extends Component {
         'CAT 4': [],
       }
     }
-    return (_.isEmpty((this.state.categoryTotals)) && _.isEmpty(this.state.dataTotals)) ?
-      <h1>Loading</h1> :
-    (
+    console.log(dataTotals2)
+    return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
-            <LineChart plotOptions={plotOptions} renderSeries={this.renderSeries([["CAT 1",dataTotals2["CAT 1"]],["CAT 2",dataTotals2["CAT 2"]],["CAT 3",dataTotals2["CAT 3"]],["CAT 4",dataTotals2["CAT 4"]]])} loaded="this.consolidatedDate" titleProp="Ejercicio 2" subtitleProp="Cat 1 chart" xAxisProp="Date" yAxisProp="Value" loadingMsg="Fetching Data..." />
         </header>
-        </div>
+        <div>
+            <LineChart
+              plotOptions={plotOptions}
+              renderSeries={this.renderSeries([["CAT 1",dataTotals2["CAT 1"]],["CAT 2",dataTotals2["CAT 2"]],["CAT 3",dataTotals2["CAT 3"]],["CAT 4",dataTotals2["CAT 4"]]])}
+              loaded={this.state.consolidatedData}
+              titleProp="Ejercicio 2"
+              subtitleProp="Valores de cada categoria en cada fecha"
+              xAxisProp="Fecha"
+              yAxisProp="Valor"
+              loadingMsg="Cargando..." />
+          </div>
+      </div>
     )
   }
   formatDateReadable(dateObject) {

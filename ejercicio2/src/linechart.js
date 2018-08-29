@@ -24,7 +24,7 @@ const LineChart = ({plotOptions, renderSeries, loaded, titleProp, subtitleProp, 
 
           <Subtitle>{subtitleProp}</Subtitle>
 
-          <Loading isLoading={!loaded}>{loadingMsg}</Loading>
+          <Loading isLoading={loaded}>{loadingMsg}</Loading>
 
           <Legend layout="vertical" align="right" verticalAlign="middle" />
 
