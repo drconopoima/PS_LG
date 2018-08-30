@@ -122,10 +122,6 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      rawData: [],
-      data1: {}, // Raw data fetched from data1
-      data2: {}, // Raw data fetched from data2
-      data3: {}, // Raw data fetched from data3
       consolidatedData: false, // When finishes fetching all data doesn't attempt to consolidate again
       cleanedDataForCharts: {},  // Conjunto de datos organizados en primer nivel por categoría y en segundo nivel por fecha
       /* cleanedDataForCharts: {
@@ -138,16 +134,6 @@ class App extends Component {
          * ... 'CAT N': [[dateMilliseconds0N,Value0N], ... [dateMillisecondsMN,ValueMN]]
          * } */
       },
-      dataTotals: {},
-      /*
-      dataTotals: {
-          'CAT 1': valueCAT1,
-          'CAT 2': valueCAT2,
-          'CAT 3': valueCAT3,
-          'CAT 4': valueCAT4
-        }
-      }
-      */
       categoryTotals: {},
       /*
       categoryTotals: {
@@ -258,7 +244,6 @@ class App extends Component {
       })
     }
   renderLineSeries(keysAndDataPoints) {
-    console.log(keysAndDataPoints);
     return (
       Object.keys(keysAndDataPoints).map((key) => {
         return (

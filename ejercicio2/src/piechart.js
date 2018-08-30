@@ -7,7 +7,6 @@ import Highcharts from 'highcharts';
 /**
  ESPAÑOL:
  Componente PieChart para cargar y mostrar un gráfico de Highcharts de tipo torta (circular o pie)]
- * @param     {[Object Javascript]} plotOptions     [Opciones para la configuración del gráfico con valores de configuración de React-JSX-Highcharts]
  * @param     {[Array]} renderSeries                [Datos a graficar]
  * @param     {[boolean]} loaded                    [Indica si se han obtenido los datos (carga async)]
  * @param     {[string]} titleLabel                  [Titulo del gráfico]
