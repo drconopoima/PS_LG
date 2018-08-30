@@ -80,11 +80,10 @@ let dataParsing = [
         'raw': {
           'isRaw': true,
           'rawKey': 'raw',
-          'regex': /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g,
+          'regex': /([0-9]{3}[0-9]{1})-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g,
           /* Regex que busca una fecha formato YYYY-MM-DD (dias y mes con ceros al comienzo). Fuente: Johan Södercrantz at RegexLib
            * http://regexlib.com/DisplayPatterns.aspx?cattabindex=4&categoryId=5&AspxAutoDetectCookieSupport=1
-           * Modificado ligeramente para evitar el año 0000 (no existio, el año anterior al 0001 DC fue el 0001 AC)
-           * También quité el "^" y el "$" para evitar que sólo compare con todo el string desde el comienzo (^) hasta el final ($),
+           * Modificado ligeramente quité el "^" y el "$" para evitar que sólo compare con todo el string desde el comienzo (^) hasta el final ($),
           */
           'replaceRegex': /()/g
           // Regex vacio, porque con el regex de fecha usado no es necesario reemplazar simbolos para aislar la variable
