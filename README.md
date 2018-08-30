@@ -5,16 +5,26 @@
 [Read in English](https://github.com/drconopoima/PS_LG/blob/master/README.en.md)
 
 * [Ejercicio 2](https://github.com/drconopoima/PS_LG/tree/master#ejercicio-2)
-** [Funcionamiento](https://github.com/drconopoima/PS_LG/tree/master#funcionamiento)
-*** [Configuración de los Json](https://github.com/drconopoima/PS_LG/tree/master#configuracion-de-los-json)
-*** [Propiedades del objeto de configuracion del parsing de los datos](https://github.com/drconopoima/PS_LG/tree/master#propiedades-del-objeto-de-configuracion-del-parsing-de-los-datos)
-*** [Propiedades del componente de React](https://github.com/drconopoima/PS_LG/tree/master#propiedades-del-componente-de-React)
-*** [Componentes de Highcharts independientes](https://github.com/drconopoima/PS_LG/tree/master#componentes-de-highcharts-independientes)
-** [Dependencias / Prerrequisitos](https://github.com/drconopoima/PS_LG/tree/master#dependencias--prerrequisitos)
-** [Instalacion y pruebas](https://github.com/drconopoima/PS_LG/tree/master#Instalacion-y-pruebas)
-** [Implementacion](https://github.com/drconopoima/PS_LG/tree/master#implementacion)
-** [Realizado con](https://github.com/drconopoima/PS_LG/tree/master#realizado-con)
-** [Autor](https://github.com/drconopoima/PS_LG/tree/master#autor)
+
+  ** [Funcionamiento](https://github.com/drconopoima/PS_LG/tree/master#funcionamiento)
+
+    *** [Configuración de los Json](https://github.com/drconopoima/PS_LG/tree/master#configuracion-de-los-json)
+
+    *** [Propiedades del objeto de configuracion del parsing de los datos](https://github.com/drconopoima/PS_LG/tree/master#propiedades-del-objeto-de-configuracion-del-parsing-de-los-datos)
+
+    *** [Propiedades del componente de React](https://github.com/drconopoima/PS_LG/tree/master#propiedades-del-componente-de-React)
+
+    *** [Componentes de Highcharts independientes](https://github.com/drconopoima/PS_LG/tree/master#componentes-de-highcharts-independientes)
+
+  ** [Dependencias / Prerrequisitos](https://github.com/drconopoima/PS_LG/tree/master#dependencias--prerrequisitos)
+
+  ** [Instalacion y pruebas](https://github.com/drconopoima/PS_LG/tree/master#Instalacion-y-pruebas)
+
+  ** [Implementacion](https://github.com/drconopoima/PS_LG/tree/master#implementacion)
+
+  ** [Realizado con](https://github.com/drconopoima/PS_LG/tree/master#realizado-con)
+
+  ** [Autor](https://github.com/drconopoima/PS_LG/tree/master#autor)
 
 ### Ejercicio 1
 
