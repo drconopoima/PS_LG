@@ -2,99 +2,113 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Highcharts from 'highcharts';
-import { withHighcharts, HighchartsChart, LineSeries, PieSeries } from 'react-jsx-highcharts';
+import { withHighcharts, LineSeries, PieSeries } from 'react-jsx-highcharts';
 import _ from 'lodash';
 import LineChart from './linechart';
 import PieChart from './piechart';
 
-let dataParsing = {
-  0: {
+/**
+ * [dataParsing: Array para generalizar la limpieza y obtención de los datos]
+ * @type {Array con Objectos}
+ * Se compone de un objeto por cada archivo Json a recibir
+ * Propiedades de los objetos:
+ * 'url': El link de donde buscar el json
+ * 'date': Objeto con los datos para obtener la fecha
+ *    * 'key': Clave del json que almacena la fecha
+ *    * 'format': Formato de la fecha, puede ser 'YYYY-MM-DD' o 'milliseconds'
+ * 'cat': Objeto con los datos para obtener la categoría
+ *    * 'key': Clave del json que almacena la categoría
+ * 'value': Objeto con los datos para obtener el valor
+ *    * 'key': Clave del json que almacena el valor
+ * Todas las claves tienen una propiedad 'raw' que almacena información requerida para limpiar si hay datos que necesiten ser procesados
+ *    * 'raw': Objeto con información requerida para limpiar la fecha si esta se almacena en datos sin procesar
+ *    *       * 'isRaw': Boolean. True si la fecha está en datos sin procesar, de otro modo false
+ *    *       * 'rawKey': Clave del json donde se almacenan datos sin procesar
+ *    *       * 'regex': Expresión Regular para obtener la fecha de los datos
+ *    *       * 'replaceRegex': Expresión regular para reemplazar algunos parámetros usados para aislar la variable de la data sin procesar
+ */
+let dataParsing = [
+  {
     'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data1.json',
     'date': {
         'key': 'd',
+        'format': 'milliseconds',
         'raw': {
-          'isRaw': false,
-          'rawKey': undefined,
-          'regex': undefined
-        },
-        'format': 'milliseconds'
-    },
-    'cat': {
+          'isRaw': false
+        }
+      },
+      'cat': {
       'key': 'cat',
       'raw': {
-        'isRaw': false,
-        'rawKey': undefined,
-        'regex': undefined
+        'isRaw': false
       }
     },
     'value': {
       'key': 'value',
       'raw': {
-        'isRaw': false,
-        'rawKey': undefined,
-        'regex': undefined
+        'isRaw': false
       }
     }
   },
-  1: {
+  {
     'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data2.json',
     'date': {
         'key': 'myDate',
+        'format': 'YYYY-MM-DD',
         'raw': {
           'isRaw': false,
-          'rawKey': undefined,
-          'regex': undefined
-        },
-        'format': 'YYYY-MM-DD'
+        }
     },
     'cat': {
       'key': 'categ',
       'raw': {
-        'isRaw': false,
-        'rawKey': undefined,
-        'regex': undefined
+        'isRaw': false
       }
     },
     'value': {
       'key': 'val',
       'raw': {
-        'isRaw': false,
-        'rawKey': undefined,
-        'regex': undefined
+        'isRaw': false
       }
     }
   },
-  2: {
+  {
     'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data3.json',
     'date': {
-        'key': 'raw',
+        'key': undefined,
+        'format': 'YYYY-MM-DD',
         'raw': {
           'isRaw': true,
           'rawKey': 'raw',
           'regex': /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g,
+          /* Regex que busca una fecha formato YYYY-MM-DD (dias y mes con ceros al comienzo). Fuente: Johan Södercrantz at RegexLib
+           * http://regexlib.com/DisplayPatterns.aspx?cattabindex=4&categoryId=5&AspxAutoDetectCookieSupport=1
+           * Modificado ligeramente para evitar el año 0000 (no existio, el año anterior al 0001 DC fue el 0001 AC)
+           * También quité el "^" y el "$" para evitar que sólo compare con todo el string desde el comienzo (^) hasta el final ($),
+          */
           'replaceRegex': /()/g
-        },
-        'format': 'YYYY-MM-DD'
+          // Regex vacio, porque con el regex de fecha usado no es necesario reemplazar simbolos para aislar la variable
+        }
     },
     'cat': {
-      'key': 'raw',
+      'key': undefined,
       'raw': {
         'isRaw': true,
         'rawKey': 'raw',
         'regex': /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g,
+        // Regex que busca una categoría entre simbolos de numeral "#".
         'replaceRegex': /(#)/g
+        // Regex para reemplazar los numerales (que necesariamente devuelve el regex anterior)
       }
     },
     'value': {
       'key': 'val',
       'raw': {
-        'isRaw': false,
-        'rawKey': undefined,
-        'regex': undefined
+        'isRaw': false
       }
     }
   }
-}
+]
 
 let dataTotals2 = {
   'CAT 1': [],
@@ -200,7 +214,7 @@ class App extends Component {
               // Fecha en milisegundos debe convertirse a YYYY-MM-DD y de nuevo a milisegundos para evitar que un mismo día tenga varios índices
               // Convertir a YYYY-MM-DD para combinar todas las horas del dia en la misma fecha
               date = this.formatDateReadable(new Date(date));
-              // Convertir de vuelta a milisegundos 
+              // Convertir de vuelta a milisegundos
               date = new Date(date);
               date = date.getTime();
             } else if (dataParsing[index]['date']['format']==='YYYY-MM-DD') {
@@ -219,6 +233,9 @@ class App extends Component {
               // Valor del elemento actual
               value = Number(elementData[dataParsing[index]['value']['key']]);
             }
+            /*
+             * TRASFORMAR DATOS EN ESTRUCTURA LIMPIA
+            */
             // Agregar la categoría a las estructuras si esta es nueva (este modo permite generalizar N categorias)
             if (!(category in categoryTotals)){
               categoryTotals[category] = value;
@@ -250,13 +267,7 @@ class App extends Component {
     allPromises[1].then(seconddataset => this.setState({data2: seconddataset}));
     allPromises[2].then(thirddataset => {
       let data3 = thirddataset;
-       /* Regex que busca una fecha formato YYYY-MM-DD (dias y mes con ceros al comienzo). Fuente: Johan Södercrantz at RegexLib
-        * http://regexlib.com/DisplayPatterns.aspx?cattabindex=4&categoryId=5&AspxAutoDetectCookieSupport=1
-        * Modificado ligeramente para evitar el año 0000 (no existio, el año anterior al 0001 DC fue el 0001 AC)
-        * También quité el "$" y el "^" para evitar que sólo compare con todo el string desde el comienzo (^) hasta el final (*),
-       */
       let regexDate = /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g;
-      // Regex que busca una categoría entre simbolos de numeral "#".
       let regexCAT = /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g;
       thirddataset.forEach((intdata, index) => {
       intdata.myDate = intdata.raw.match(regexDate)[0];
