@@ -108,14 +108,7 @@ let dataParsing = [
       }
     }
   }
-]
-
-let dataTotals2 = {
-  'CAT 1': [],
-  'CAT 2': [],
-  'CAT 3': [],
-  'CAT 4': []
-}
+];
 
 const plotOptions = {
   line: {
@@ -133,7 +126,7 @@ class App extends Component {
       data1: {}, // Raw data fetched from data1
       data2: {}, // Raw data fetched from data2
       data3: {}, // Raw data fetched from data3
-      consolidatedData: true, // When finishes fetching all data doesn't attempt to consolidate again
+      consolidatedData: false, // When finishes fetching all data doesn't attempt to consolidate again
       cleanedDataForCharts: {},  // Conjunto de datos organizados en primer nivel por categoría y en segundo nivel por fecha
       /* cleanedDataForCharts: {
        *     'CAT 1': { 'dateMilliseconds': Value } ...
@@ -254,109 +247,22 @@ class App extends Component {
         this.setState({cleanedDataForCharts: cleanedDataForCharts});
         this.setState({categoryTotals: categoryTotals});
         Object.keys(categoryTotals).forEach((key) => {
-          lineChartDataArray[key] = Object.keys(cleanedDataForCharts[key]).map((data) => {
-              return [data,cleanedDataForCharts[key][data]];
+          let sortedDates = cleanedDataForCharts[key];
+          lineChartDataArray[key] = Object.keys(sortedDates).map((data) => {
+            return [Number(data),cleanedDataForCharts[key][data]];
           })
+          lineChartDataArray[key].sort();
         });
         this.setState({lineChartDataArray: lineChartDataArray});
-        console.log('categoryTotals', this.state.categoryTotals);
-        console.log('cleanedDataForCharts', this.state.cleanedDataForCharts);
-        console.log('lineChartDataArray', this.state.lineChartDataArray);
+        this.setState({consolidatedData: true});
       })
-    allPromises[0].then(firstdataset => this.setState({data1: firstdataset}));
-    allPromises[1].then(seconddataset => this.setState({data2: seconddataset}));
-    allPromises[2].then(thirddataset => {
-      let data3 = thirddataset;
-      let regexDate = /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g;
-      let regexCAT = /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g;
-      thirddataset.forEach((intdata, index) => {
-      intdata.myDate = intdata.raw.match(regexDate)[0];
-      intdata.CAT = intdata.raw.match(regexCAT)[0].replace(/#/g,'');
-      data3.index = intdata;
-      })
-      this.setState({data3: data3})
-    });
-  }
-  componentDidUpdate() {
-    if (this.state.consolidatedData) {
-      let {data1, data2, data3, dataTotals, categoryTotals} = this.state
-      dataTotals.dates = [];
-      if (data1.length && data2.length && data3.length) {
-        let whichCAT
-        let value
-        let whichDate
-        this.setState({consolidatedData: false}); // no consolidar la data otra vez en subsiguientes updates
-        categoryTotals = {
-          'CAT 1': 0,
-          'CAT 2': 0,
-          'CAT 3': 0,
-          'CAT 4': 0
-        }
-        for (let elementData1 of data1) {
-          whichCAT = elementData1.cat.toUpperCase();
-          whichDate = this.formatDateReadable(new Date(elementData1.d));
-          value = Number(elementData1.value);
-          if (whichDate in dataTotals) {
-            if (whichCAT in dataTotals[whichDate]) {
-              dataTotals[whichDate][whichCAT] += value;
-              categoryTotals[whichCAT] += value;
-            } else {
-              dataTotals[whichDate][whichCAT] = value;
-              categoryTotals[whichCAT] += value;
-            }
-          } else {
-            dataTotals.dates = [...dataTotals.dates,whichDate];
-            dataTotals[whichDate] = {[whichCAT]: value};
-            categoryTotals[whichCAT] += value;
-          }
-        }
-        for (let elementData2 of data2) {
-          whichCAT = elementData2.categ.toUpperCase();
-          value = Number(elementData2.val);
-          whichDate = this.formatDateReadable(new Date(elementData2.myDate));
-          if (whichDate in dataTotals) {
-            if (whichCAT in dataTotals[whichDate]) {
-              dataTotals[whichDate][whichCAT] += value;
-              categoryTotals[whichCAT] += value;
-            } else {
-              dataTotals[whichDate][whichCAT] = value;
-              categoryTotals[whichCAT] += value;
-            }
-          } else {
-            dataTotals.dates = [...dataTotals.dates,whichDate];
-            dataTotals[whichDate] = {[whichCAT]: value};
-            categoryTotals[whichCAT] += value;
-          }
-        }
-        for (let elementData3 of data3) {
-          whichCAT = elementData3.CAT.toUpperCase();
-          value = Number(elementData3.val);
-          whichDate = this.formatDateReadable(new Date(elementData3.myDate));
-          if (whichDate in dataTotals) {
-            if (whichCAT in dataTotals[whichDate]) {
-              dataTotals[whichDate][whichCAT] += value;
-              categoryTotals[whichCAT] += value;
-            } else {
-              dataTotals[whichDate][whichCAT] = value;
-              categoryTotals[whichCAT] += value;
-            }
-          } else {
-            dataTotals.dates = [...dataTotals.dates,whichDate];
-            dataTotals[whichDate] = {[whichCAT]: value};
-            categoryTotals[whichCAT] += value;
-          }
-        }
-        dataTotals.dates.sort();
-        this.setState({dataTotals: dataTotals});
-        this.setState({categoryTotals: categoryTotals});
-      }
     }
-  }
-  renderLineSeries (keysAndDataPoints) {
+  renderLineSeries(keysAndDataPoints) {
+    console.log(keysAndDataPoints);
     return (
-      keysAndDataPoints.map((keyAndDataPoint) => {
+      Object.keys(keysAndDataPoints).map((key) => {
         return (
-            <LineSeries data={keyAndDataPoint[1]} name={keyAndDataPoint[0]} key={_.uniqueId()} />
+            <LineSeries data={keysAndDataPoints[key]} name={key} key={_.uniqueId()} />
           )
       })
     )
@@ -370,44 +276,27 @@ class App extends Component {
     )
   }
   render() {
-    if (!(_.isEmpty(this.state.categoryTotals) && _.isEmpty(this.state.dataTotals))) {
-      let whichDateInMilliseconds
-      let keyDateString
-      for(let i=0; i<this.state.dataTotals.dates.length; i++) {
-        keyDateString = this.state.dataTotals.dates[i];
-        whichDateInMilliseconds = this.formatDateInMilliseconds(keyDateString)
-        dataTotals2['CAT 1'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 1']];
-        dataTotals2['CAT 2'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 2']];
-        dataTotals2['CAT 3'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 3']];
-        dataTotals2['CAT 4'][i] = [whichDateInMilliseconds, this.state.dataTotals[keyDateString]['CAT 4']];
-      }
-    }
-    let {categoryTotals, consolidatedData} = this.state;
-    let pieChartData = this.renderPieChart(categoryTotals,'Total');
+    let { lineChartDataArray, consolidatedData, categoryTotals } = this.state;
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Panel de resultados basado en React</h1>
+          <h1 className="App-title">Panel de resultados del Ejercicio 2 de Devo</h1>
         </header>
         <div>
             <LineChart
               plotOptions={plotOptions}
-              renderSeries={this.renderLineSeries(
-                [["CAT 1",dataTotals2["CAT 1"]],
-                ["CAT 2",dataTotals2["CAT 2"]],
-                ["CAT 3",dataTotals2["CAT 3"]],
-                ["CAT 4",dataTotals2["CAT 4"]]])}
-              loaded={consolidatedData}
-              titleLabel="Ejercicio 2"
-              subtitleLabel="Valores de cada categoria en cada fecha"
+              renderSeries={this.renderLineSeries(lineChartDataArray)}
+              loaded={!consolidatedData}
+              titleLabel="Valores por categoría en el tiempo"
+              subtitleLabel="Tasa de cambio del valor de cada categoría"
               xAxisLabel="Fecha"
               yAxisLabel="Valor"
               loadingMsg="Cargando..." />
             <PieChart
               titleLabel="Totales para cada categoría"
-              loaded={consolidatedData}
-              renderSeries={pieChartData}
+              loaded={!consolidatedData}
+              renderSeries={this.renderPieChart(categoryTotals)}
               loadingMsg="Cargando..."
               axisLabel="Total" />
 
@@ -428,15 +317,7 @@ class App extends Component {
     let year = dateObject.getFullYear();
     if (month.length < 2) month = '0' + month;
     if (day.length < 2) day = '0' + day;
-
     return [year, month, day].join('-');
-  }
-  formatDateInMilliseconds(date) {
-    // Toma una fecha en String y la formatea en milisegundos. Aunque data1 esté en milisegundos, es necesario
-    // convertir primero a fecha YYYY/MM/DD y luego a milisegundos porque un día tiene muchos milisegundos
-    // y para que se agrupen juntos hay que garantizar el mismo día
-    let dateAsObject = new Date(date)
-    return dateAsObject.getTime();
   }
 }
 
