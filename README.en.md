@@ -5,17 +5,26 @@
 [Leer en español](https://github.com/drconopoima/PS_LG/blob/master/README.md)
 
 * [Exercise 1](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#exercise-2)
-** [Inner workings](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#inner-workings)
-*** [Json's configuration](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#json-s-configuration)
-*** [Properties of the data parsing configuration object](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#properties-of-the-data-parsing-configuration-object)
-*** [Properties of the React component](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#properties-of-the-react-component)
-*** [Independent Highcharts components](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#independent-highcharts-components)
-** [Prerrequisites / Dependencies](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#prerrequisites--dependencies)
-** [Installing and testing](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#installing-and-testing)
-** [Deployment Notes](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#deployment-notes)
-** [Built With](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#built-with)
-** [Author](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#author)
 
+  ** [Inner workings](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#inner-workings)
+
+    *** [Json's configuration](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#json-s-configuration)
+
+    *** [Properties of the data parsing configuration object](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#properties-of-the-data-parsing-configuration-object)
+
+    *** [Properties of the React component](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#properties-of-the-react-component)
+
+    *** [Independent Highcharts components](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#independent-highcharts-components)
+
+  ** [Prerrequisites / Dependencies](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#prerrequisites--dependencies)
+
+  ** [Installing and testing](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#installing-and-testing)
+
+  ** [Deployment Notes](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#deployment-notes)
+
+  ** [Built With](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#built-with)
+
+  ** [Author](https://github.com/drconopoima/PS_LG/tree/master/README.en.md#author)
 
 ### Exercise 1
 
