@@ -7,13 +7,14 @@ import _ from 'lodash';
 import LineChart from './linechart';
 import PieChart from './piechart';
 
-const dataParsing = {
+let dataParsing = {
   0: {
     'url': 'https://s3.amazonaws.com/logtrust-static/test/test/data1.json',
     'date': {
         'key': 'd',
         'raw': {
           'isRaw': false,
+          'rawKey': undefined,
           'regex': undefined
         },
         'format': 'milliseconds'
@@ -22,6 +23,7 @@ const dataParsing = {
       'key': 'cat',
       'raw': {
         'isRaw': false,
+        'rawKey': undefined,
         'regex': undefined
       }
     },
@@ -29,6 +31,7 @@ const dataParsing = {
       'key': 'value',
       'raw': {
         'isRaw': false,
+        'rawKey': undefined,
         'regex': undefined
       }
     }
@@ -39,6 +42,7 @@ const dataParsing = {
         'key': 'myDate',
         'raw': {
           'isRaw': false,
+          'rawKey': undefined,
           'regex': undefined
         },
         'format': 'YYYY-MM-DD'
@@ -47,6 +51,7 @@ const dataParsing = {
       'key': 'categ',
       'raw': {
         'isRaw': false,
+        'rawKey': undefined,
         'regex': undefined
       }
     },
@@ -54,6 +59,7 @@ const dataParsing = {
       'key': 'val',
       'raw': {
         'isRaw': false,
+        'rawKey': undefined,
         'regex': undefined
       }
     }
@@ -64,7 +70,9 @@ const dataParsing = {
         'key': 'raw',
         'raw': {
           'isRaw': true,
+          'rawKey': 'raw',
           'regex': /[0-9]{3}[1-9]{1}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))+/g,
+          'replaceRegex': /()/g
         },
         'format': 'YYYY-MM-DD'
     },
@@ -72,13 +80,16 @@ const dataParsing = {
       'key': 'raw',
       'raw': {
         'isRaw': true,
-        'regex': /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g
+        'rawKey': 'raw',
+        'regex': /(#[C]{1}[A]{1}[T]{1} [1234]{1}#)+/g,
+        'replaceRegex': /(#)/g
       }
     },
     'value': {
       'key': 'val',
       'raw': {
         'isRaw': false,
+        'rawKey': undefined,
         'regex': undefined
       }
     }
@@ -109,15 +120,16 @@ class App extends Component {
       data2: {}, // Raw data fetched from data2
       data3: {}, // Raw data fetched from data3
       consolidatedData: true, // When finishes fetching all data doesn't attempt to consolidate again
-      /* cleanedDataForCharts: {  Conjunto de datos organizados en primer nivel por categoría y en segundo nivel por fecha
-       *     'CAT 1': { 'YYYY-MM-DD': Val } ...
-       * ... 'CAT 4': { 'YYYY-MM-DD': Val }
+      cleanedDataForCharts: {},  // Conjunto de datos organizados en primer nivel por categoría y en segundo nivel por fecha
+      /* cleanedDataForCharts: {
+       *     'CAT 1': { 'dateMilliseconds': Value } ...
+       * ... 'CAT N': { 'dateMilliseconds': Value }
        * } */
-      cleanedDataForCharts: {
-        'CAT 1': {},
-        'CAT 2': {},
-        'CAT 3': {},
-        'CAT 4': {}
+      lineChartDataArray: {  // Conjuntos de datos para pasar al componente LineSeries
+        /* cleanedDataForCharts: {
+         *     'CAT 1': [[dateMilliseconds01,Value01], ... [dateMillisecondsM1,ValueM1]], ...
+         * ... 'CAT N': [[dateMilliseconds0N,Value0N], ... [dateMillisecondsMN,ValueMN]]
+         * } */
       },
       dataTotals: {},
       /*
@@ -146,6 +158,9 @@ class App extends Component {
      * "cargando...". Por lo tanto, se ejecuta en Component Did Mount
     */
     let allPromises = [];
+    let categoryTotals = {};
+    let cleanedDataForCharts = {};
+    let lineChartDataArray = {};
     // Crear una promesa por cada Json que haya que recibir
     Object.values(dataParsing).forEach((objectValue, index) => {
       allPromises.push(fetch(dataParsing[index]['url'])
@@ -157,8 +172,79 @@ class App extends Component {
         this.setState({rawData: allResponses});
         // Guardar la data en forma limpia en claves 'data#' del estado de la App
         allResponses.forEach((eachResponse, index) => {
-          console.log(eachResponse);
+          let category, value, date;
+          for (let elementData of eachResponse) {
+            /*
+             * FORMATEO DE CATEGORIA
+            */
+            // Si la categoria está en los datos sin formatear, debe formatearse primero
+            if (dataParsing[index]['cat']['raw']['isRaw']) {
+              let regexCAT = dataParsing[index]['cat']['raw']['regex'];
+              category = elementData[dataParsing[index]['cat']['raw']['rawKey']].match(regexCAT)[0].replace(dataParsing[index]['cat']['raw']['replaceRegex'],'');
+            } else{
+              // categoria del elemento actual
+              category = elementData[dataParsing[index]['cat']['key']].toUpperCase();
+            }
+            /*
+             * FORMATEO DE FECHA
+            */
+            // Si la fecha está en los datos sin formatear, debe formatearse primero
+            if (dataParsing[index]['date']['raw']['isRaw']) {
+              let regexDate = dataParsing[index]['date']['raw']['regex'];
+              date = elementData[dataParsing[index]['date']['raw']['rawKey']].match(regexDate)[0].replace(dataParsing[index]['date']['raw']['replaceRegex'],'');
+            } else {
+              // fecha del elemento actual
+              date = elementData[dataParsing[index]['date']['key']];
+            }
+            if (dataParsing[index]['date']['format']==='milliseconds') {
+              // Fecha en milisegundos debe convertirse a YYYY-MM-DD y de nuevo a milisegundos para evitar que un mismo día tenga varios índices
+              // Convertir a YYYY-MM-DD para combinar todas las horas del dia en la misma fecha
+              date = this.formatDateReadable(new Date(date));
+              // Convertir de vuelta a milisegundos 
+              date = new Date(date);
+              date = date.getTime();
+            } else if (dataParsing[index]['date']['format']==='YYYY-MM-DD') {
+              // Fecha en YYYY-MM-DD debe convertirse a milisegundos
+              date = new Date(date);
+              date = date.getTime();
+            }
+            /*
+             * FORMATEO DE VALOR
+            */
+            // Si el valor está en los datos sin formatear, debe formatearse primero
+            if (dataParsing[index]['value']['raw']['isRaw']) {
+              let regexValue = dataParsing[index]['value']['raw']['regex'];
+              value = Number(elementData[dataParsing[index]['value']['raw']['rawKey']].match(regexValue)[0].replace(dataParsing[index]['value']['raw']['replaceRegex'],''));
+            } else{
+              // Valor del elemento actual
+              value = Number(elementData[dataParsing[index]['value']['key']]);
+            }
+            // Agregar la categoría a las estructuras si esta es nueva (este modo permite generalizar N categorias)
+            if (!(category in categoryTotals)){
+              categoryTotals[category] = value;
+              cleanedDataForCharts[category] = {};
+            } else { // si la categoría ya esta presente, continuar agregando valores
+              categoryTotals[category] += value;
+            }
+            // si la categoría ya esta presente, continuar agregando fechas y valores
+            if (!(date in cleanedDataForCharts[category])) {
+              cleanedDataForCharts[category][date] = value;
+            } else {
+              cleanedDataForCharts[category][date] += value;
+            }
+          }
         })
+        this.setState({cleanedDataForCharts: cleanedDataForCharts});
+        this.setState({categoryTotals: categoryTotals});
+        Object.keys(categoryTotals).forEach((key) => {
+          lineChartDataArray[key] = Object.keys(cleanedDataForCharts[key]).map((data) => {
+              return [data,cleanedDataForCharts[key][data]];
+          })
+        });
+        this.setState({lineChartDataArray: lineChartDataArray});
+        console.log('categoryTotals', this.state.categoryTotals);
+        console.log('cleanedDataForCharts', this.state.cleanedDataForCharts);
+        console.log('lineChartDataArray', this.state.lineChartDataArray);
       })
     allPromises[0].then(firstdataset => this.setState({data1: firstdataset}));
     allPromises[1].then(seconddataset => this.setState({data2: seconddataset}));
