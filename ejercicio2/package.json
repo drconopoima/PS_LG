@@ -9,7 +9,7 @@
     "react-dom": "^16.4.2",
     "react-highcharts": "^16.0.2",
     "react-jsx-highcharts": "^3.2.1",
-    "react-scripts": "1.1.5"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
